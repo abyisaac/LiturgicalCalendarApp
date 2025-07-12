@@ -3,16 +3,24 @@ import pandas as pd
 from datetime import datetime
 from fpdf import FPDF
 
-# 🌈 Custom CSS for vibrant, responsive layout
+# 🌈 Custom CSS for heading and layout
 st.markdown("""
     <style>
     html, body {
         font-family: 'Segoe UI', sans-serif;
         background-color: #f3f6fa;
     }
-    h2 {
-        color: #4B0082;
-        margin-bottom: 1rem;
+    .heading-banner {
+        font-size: 36px;
+        font-weight: 700;
+        text-align: center;
+        color: white;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        background-color: #800000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        letter-spacing: 1px;
     }
     .calendar-box {
         background-color: #ffffff;
@@ -28,15 +36,36 @@ st.markdown("""
         margin-bottom: 16px;
         color: #003366;
     }
-    .stDataFrame table {
-        font-size: 16px;
+    .custom-label {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333333;
+        margin-top: 10px;
+    }
+    .small-subheader {
+        font-size: 16px !important;
+        font-weight: 600;
+        color: #800000;
+        margin-top: 20px;
+    }
+    .stDownloadButton button {
+        font-size: 18px !important;
+        font-weight: bold !important;
+        background-color: #800000 !important;
+        color: white !important;
+        border-radius: 6px;
+        padding: 10px 20px;
+        margin-top: 20px;
+    }
+    [data-testid="stElementToolbar"] {
+        display: none !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # 📘 Page setup
 st.set_page_config(page_title="Liturgical Calendar", layout="centered")
-st.markdown("<h2 style='text-align: center;'>🕯️ Liturgical Year Explorer : AD 1583 to 3000</h2>", unsafe_allow_html=True)
+st.markdown("<div class='heading-banner'>🕯️ Liturgical Year Explorer</div>", unsafe_allow_html=True)
 
 # 📄 Load calendar data
 @st.cache_data
@@ -51,16 +80,17 @@ calendar_df = load_calendar(file_path)
 with st.container():
     st.markdown("<div class='calendar-box'>", unsafe_allow_html=True)
 
-    # 📅 Default to current year and month
     today = datetime.today()
     current_year = today.year
     current_month = today.strftime("%B")
 
+    st.markdown("<div class='custom-label'>Select a Year <span style='font-weight:normal;'>(or type a year)</span></div>", unsafe_allow_html=True)
     year = st.number_input("Select a Year", min_value=1583, max_value=3000, value=current_year, step=1)
-    events = list(calendar_df.index)
-    selected_event = st.selectbox("Choose a Liturgical Event", events)
 
-    # 🧠 Display selected event date
+    st.markdown("<div class='custom-label'>Choose a Liturgical Event</div>", unsafe_allow_html=True)
+    events = list(calendar_df.index)
+    selected_event = st.selectbox("Choose a Liturgical Event", events, placeholder="Type or choose from list")
+
     try:
         date_str = calendar_df.loc[selected_event, year]
         if date_str == "TBD":
@@ -73,16 +103,15 @@ with st.container():
                 unsafe_allow_html=True
             )
     except Exception as e:
-        st.error(f"⚠️ Unable to find data: {e}")
+        st.error(f"⚠️ Unable to find data for {selected_event}: {e}")
 
-    # 📆 Month filter
     month_names = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ]
-    selected_month = st.selectbox("📆 Filter Events by Month", month_names, index=month_names.index(current_month))
+    st.markdown("<div class='custom-label'>Filter Events by Month</div>", unsafe_allow_html=True)
+    selected_month = st.selectbox("Filter Events by Month", month_names, index=month_names.index(current_month))
 
-    # 🔍 Filter events by month
     month_filtered = []
     for event in calendar_df.index:
         date_str = calendar_df.loc[event, year]
@@ -94,9 +123,8 @@ with st.container():
             except:
                 pass
 
-    # 📋 Display filtered month results
     if month_filtered:
-        st.subheader(f"📘 Events in {selected_month} {year}")
+        st.markdown(f"<div class='small-subheader'>📘 Events in {selected_month} {year}</div>", unsafe_allow_html=True)
         df_month = pd.DataFrame(month_filtered, columns=["Day of Importance", "Date"])
         st.dataframe(df_month, use_container_width=True)
     else:
@@ -104,7 +132,7 @@ with st.container():
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# 🖨️ PDF Generator
+# 📄 PDF Generator
 class PDFGenerator(FPDF):
     def header(self):
         self.set_font("Arial", "B", 11)
@@ -141,7 +169,7 @@ def create_year_pdf(year):
 pdf_bytes = create_year_pdf(year)
 
 st.download_button(
-    label=f"⬇️ Download Full Calendar for AD {year} as PDF",
+    label=f"⬇️ **Download Full Calendar for AD {year} as PDF**",
     data=pdf_bytes,
     file_name=f"LiturgicalCalendar_AD{year}.pdf",
     mime="application/pdf"
