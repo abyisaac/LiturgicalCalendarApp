@@ -11,50 +11,50 @@ st.markdown("""
         background-color: #f3f6fa;
     }
     .heading-banner {
-        font-size: 36px;
+        font-size: 32px;
         font-weight: 700;
         text-align: center;
         color: white;
-        padding: 16px;
-        border-radius: 12px;
-        margin-bottom: 25px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        margin-bottom: 20px;
         background-color: #800000;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        letter-spacing: 1px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        letter-spacing: 0.8px;
     }
     .calendar-box {
         background-color: #ffffff;
         border-radius: 10px;
-        padding: 20px;
+        padding: 18px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     .highlight {
         background-color: #e8f0fe;
         padding: 10px;
         border-radius: 8px;
-        font-size: 18px;
+        font-size: 17px;
         margin-bottom: 16px;
         color: #003366;
     }
     .custom-label {
-        font-size: 18px;
+        font-size: 17px;
         font-weight: bold;
         color: #333333;
         margin-top: 10px;
     }
     .small-subheader {
-        font-size: 16px !important;
+        font-size: 15px !important;
         font-weight: 600;
         color: #800000;
         margin-top: 20px;
     }
     .stDownloadButton button {
-        font-size: 18px !important;
-        font-weight: bold !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
         background-color: #800000 !important;
         color: white !important;
         border-radius: 6px;
-        padding: 10px 20px;
+        padding: 8px 16px;
         margin-top: 20px;
     }
     [data-testid="stElementToolbar"] {
