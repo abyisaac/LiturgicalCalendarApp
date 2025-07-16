@@ -25,13 +25,13 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         letter-spacing: 0.8px;
     }
-    .intro-text {
-        text-align: center;
-        font-size: 16px;
-        color: #333333;
-        margin-bottom: 30px;
-        padding: 0 20px;
-    }
+.intro-text {
+    text-align: justify;
+    font-size: 16px;
+    color: #333333;
+    margin-bottom: 0px;  /* 👈 reduce spacing */
+    padding: 0 20px;
+}
     .calendar-box {
         background-color: #ffffff;
         border-radius: 12px;
