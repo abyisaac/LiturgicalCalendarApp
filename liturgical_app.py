@@ -3,69 +3,84 @@ import pandas as pd
 from datetime import datetime
 from fpdf import FPDF
 
-# 🌈 Custom CSS for heading and layout
+# 🌈 Custom CSS for elegant UI and hiding Streamlit branding
 st.markdown("""
     <style>
     html, body {
         font-family: 'Segoe UI', sans-serif;
         background-color: #f3f6fa;
     }
+    #MainMenu { visibility: hidden; }
+    footer { visibility: hidden; }
+    header { visibility: hidden; }
     .heading-banner {
         font-size: 32px;
         font-weight: 700;
         text-align: center;
         color: white;
-        padding: 10px 12px;
+        padding: 12px 16px;
         border-radius: 10px;
         margin-bottom: 20px;
         background-color: #800000;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         letter-spacing: 0.8px;
+    }
+    .intro-text {
+        text-align: center;
+        font-size: 16px;
+        color: #333333;
+        margin-bottom: 30px;
+        padding: 0 20px;
     }
     .calendar-box {
         background-color: #ffffff;
-        border-radius: 10px;
-        padding: 18px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
-    .highlight {
-        background-color: #e8f0fe;
-        padding: 10px;
-        border-radius: 8px;
-        font-size: 17px;
-        margin-bottom: 16px;
-        color: #003366;
+    .highlight-box {
+        background: linear-gradient(135deg, #fdf6f0, #f0e6dc);
+        border-left: 6px solid #800000;
+        padding: 16px;
+        border-radius: 10px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
     .custom-label {
         font-size: 17px;
         font-weight: bold;
         color: #333333;
-        margin-top: 10px;
+        margin-top: 16px;
     }
     .small-subheader {
         font-size: 15px !important;
         font-weight: 600;
         color: #800000;
-        margin-top: 20px;
+        margin-top: 24px;
     }
     .stDownloadButton button {
         font-size: 16px !important;
         font-weight: 600 !important;
         background-color: #800000 !important;
         color: white !important;
-        border-radius: 6px;
-        padding: 8px 16px;
-        margin-top: 20px;
-    }
-    [data-testid="stElementToolbar"] {
-        display: none !important;
+        border-radius: 8px;
+        padding: 10px 20px;
+        margin-top: 24px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     </style>
 """, unsafe_allow_html=True)
 
 # 📘 Page setup
-st.set_page_config(page_title="Liturgical Calendar", layout="centered")
+st.set_page_config(page_title="Liturgical Calendar", page_icon="🕯️", layout="centered")
 st.markdown("<div class='heading-banner'>🕯️ Liturgical Year Explorer</div>", unsafe_allow_html=True)
+
+# 📘 Intro paragraph
+st.markdown("""
+    <div class='intro-text'>
+        This app presents key liturgical dates observed by the <strong>Malankara Mar Thoma Syrian Church</strong>, following the <strong>Gregorian calendar</strong>. You can select any year and event to view its exact weekday and date. Events can also be filtered by month. The calendar spans from <strong>AD 1583 to 3000</strong>, making it useful for both current and historical reference. A <strong>downloadable PDF version</strong> is available for offline use, study, or sharing.
+    </div>
+""", unsafe_allow_html=True)
 
 # 📄 Load calendar data
 @st.cache_data
@@ -98,10 +113,13 @@ with st.container():
         else:
             date_obj = datetime.strptime(date_str, "%d-%b-%Y")
             weekday = date_obj.strftime("%A")
-            st.markdown(
-                f"<div class='highlight'>📅 <strong>{selected_event}</strong> falls on <strong>{weekday}, {date_str}</strong></div>",
-                unsafe_allow_html=True
-            )
+            formatted = f"{weekday}, {date_str}"
+            st.markdown(f"""
+                <div class='highlight-box'>
+                    <div style='font-size:18px; font-weight:600; margin-bottom:6px;'>{selected_event}</div>
+                    <div style='font-size:22px; font-family:Segoe UI, sans-serif; color:#003366;'>{formatted}</div>
+                </div>
+            """, unsafe_allow_html=True)
     except Exception as e:
         st.error(f"⚠️ Unable to find data for {selected_event}: {e}")
 
@@ -119,13 +137,14 @@ with st.container():
             try:
                 date_obj = datetime.strptime(date_str, "%d-%b-%Y")
                 if date_obj.strftime("%B") == selected_month:
-                    month_filtered.append((event, date_str))
+                    weekday = date_obj.strftime("%A")
+                    month_filtered.append((event, f"{weekday}, {date_str}"))
             except:
                 pass
 
     if month_filtered:
         st.markdown(f"<div class='small-subheader'>📘 Events in {selected_month} {year}</div>", unsafe_allow_html=True)
-        df_month = pd.DataFrame(month_filtered, columns=["Day of Importance", "Date"])
+        df_month = pd.DataFrame(month_filtered, columns=["Day of Importance", "Day & Date"])
         st.dataframe(df_month, use_container_width=True)
     else:
         st.info(f"No events found in {selected_month} {year}.")
@@ -142,7 +161,7 @@ class PDFGenerator(FPDF):
         self.set_x(20)
         self.cell(20, 6, "Sl. No.", border=1, align="C")
         self.cell(100, 6, "Day of Importance", border=1, align="C")
-        self.cell(50, 6, "Date", border=1, align="C")
+        self.cell(50, 6, "Day & Date", border=1, align="C")
         self.ln()
 
     def footer(self):
@@ -152,15 +171,27 @@ class PDFGenerator(FPDF):
         self.set_font("Arial", "", 8)
         row_height = 5.0
         self.set_y(self.get_y())
-        for idx, (event, date) in enumerate(data, start=1):
+        for idx, (event, date_str) in enumerate(data, start=1):
             self.set_x(20)
             self.cell(20, row_height, str(idx), border=1, align="C")
             self.cell(100, row_height, str(event), border=1, align="L")
-            self.cell(50, row_height, str(date), border=1, align="C")
+            self.cell(50, row_height, str(date_str), border=1, align="C")
             self.ln()
 
 def create_year_pdf(year):
-    data_pairs = list(zip(calendar_df.index, calendar_df[year]))
+    data_pairs = []
+    for event in calendar_df.index:
+        date_str = calendar_df.loc[event, year]
+        if pd.notna(date_str) and date_str != "TBD":
+            try:
+                date_obj = datetime.strptime(date_str, "%d-%b-%Y")
+                weekday = date_obj.strftime("%A")
+                formatted = f"{weekday}, {date_str}"
+                data_pairs.append((event, formatted))
+            except:
+                data_pairs.append((event, date_str))
+        else:
+            data_pairs.append((event, date_str))
     pdf = PDFGenerator("P", "mm", "A4")
     pdf.add_page()
     pdf.add_table(data_pairs)
@@ -169,7 +200,7 @@ def create_year_pdf(year):
 pdf_bytes = create_year_pdf(year)
 
 st.download_button(
-    label=f"⬇️ **Download Full Calendar for AD {year} as PDF**",
+    label=f"⬇️ Download Full Calendar for AD {year} as PDF",
     data=pdf_bytes,
     file_name=f"LiturgicalCalendar_AD{year}.pdf",
     mime="application/pdf"
